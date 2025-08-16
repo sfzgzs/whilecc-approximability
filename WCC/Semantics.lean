@@ -16,27 +16,59 @@ theorem Carrier.rfl (x : Carrier s) : x == x := by
 
 abbrev State := ∀ ⦃s: MSort⦄, (Var s → Carrier s)
 
-def Term.eval (t : Term s) (σ : State) : Carrier s :=
+def Term.eval (t : Term s) (σ : State) : Option (Carrier s) :=
   match t with
   | .var x => σ x
   | .true => Bool.true
   | .false => Bool.false
-  | .and t₁ t₂ => Bool.and (eval t₁ σ ) ( eval t₂ σ)
-  | .or t₁ t₂ => Bool.or (eval t₁ σ ) ( eval t₂ σ)
-  | .zero => 0
-  | .succ t => eval t σ + 1
-  | .add t₁ t₂ => eval t₁ σ + eval t₂ σ
-  | .mul t₁ t₂ => eval t₁ σ * eval t₂ σ
-  | .eq t₁ t₂  => eval t₁ σ == eval t₂ σ
-  | .lt t₁ t₂  => eval t₁ σ < eval t₂ σ
+  | .and t₁ t₂ => do
+    let x ← eval t₁ σ
+    let y ← eval t₂ σ
+    return Bool.and x y
+    -- bind (eval t₁ σ) fun (x : Bool) =>
+    -- bind (eval t₂ σ) fun y =>
+    --   Bool.and x y
+  | .or t₁ t₂ => do
+    let x ← eval t₁ σ
+    let y ← eval t₂ σ
+    return Bool.or x y
+  | .zero => some 0
+  | .succ t => do
+    let x ← eval t σ
+    return x + 1
+  | .add t₁ t₂ => do
+    let x ← eval t₁ σ
+    let y ← eval t₂ σ
+    return x + y
+  | .mul t₁ t₂ => do
+    let x ← eval t₁ σ
+    let y ← eval t₂ σ
+    return x * y
+  | .eq t₁ t₂  => do
+    let x ← eval t₁ σ
+    let y ← eval t₂ σ
+    return x == y
+  | .lt t₁ t₂  => do
+    let x ← eval t₁ σ
+    let y ← eval t₂ σ
+    return x < y
 
-
-def Stmt.eval : Stmt →  State → State
-  | .skip, σ₁ => σ₁
-  | @Stmt.assign s x t, σ₁ => fun s' x' =>
+def State.ass (x : Var s) (t : Carrier s) (σ : State) : State :=
+  fun s' (x' : Var s') =>
     match s, s' with
-    | .bool, .bool => if x == x' then Term.eval t σ₁ else σ₁ x'
-    | .nat, .nat => if x == x' then Term.eval t σ₁ else σ₁ x'
-    | _, _ => σ₁ x'
-  | .seq s₁ s₂, σ₁ => Stmt.eval s₂ (Stmt.eval s₁ σ₁)
-  | .ifThenElse b s₁ s₂, σ₁ => if Term.eval b σ₁ then Stmt.eval s₁ σ₁ else Stmt.eval s₂ σ₁
+    | .bool, .bool => if x == x' then t else σ x'
+    | .nat, .nat => if x == x' then t else σ x'
+    | _, _ => σ x'
+
+def Stmt.eval : Stmt →  State → Option State
+  | .skip, σ₁ => σ₁
+  | .assign x t, σ₁ => do
+    let xt ← Term.eval t σ₁
+    return .ass x xt σ₁
+  | .seq s₁ s₂, σ₁ => do
+    let x ← Stmt.eval s₁ σ₁
+    let y ← Stmt.eval s₂ x
+    return y
+  | .ifThenElse b s₁ s₂, σ₁ => do
+    let x ← Term.eval b σ₁
+    if x then Stmt.eval s₁ σ₁ else Stmt.eval s₂ σ₁
