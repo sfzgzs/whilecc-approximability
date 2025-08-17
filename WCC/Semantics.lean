@@ -1,3 +1,4 @@
+import Mathlib
 import WCC.Syntax
 
 abbrev Carrier : MSort → Type
@@ -16,7 +17,7 @@ theorem Carrier.rfl (x : Carrier s) : x == x := by
 
 abbrev State := ∀ ⦃s: MSort⦄, (Var s → Carrier s)
 
-def Term.eval (t : Term s) (σ : State) : Option (Carrier s) :=
+def Term.eval (t : Term s) (σ : State) : Part (Carrier s) :=
   match t with
   | .var x => σ x
   | .true => Bool.true
@@ -60,8 +61,8 @@ def State.ass (x : Var s) (t : Carrier s) (σ : State) : State :=
     | .nat, .nat => if x == x' then t else σ x'
     | _, _ => σ x'
 
-partial def Stmt.eval : Stmt →  State → Option State
-  | .div, _ => none
+partial def Stmt.eval : Stmt →  State → Part State
+  | .div, _ => ⊥
   | .skip, σ₁ => σ₁
   | .assign x t, σ₁ => do
     let xt ← Term.eval t σ₁
