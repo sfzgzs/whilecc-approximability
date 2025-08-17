@@ -61,10 +61,17 @@ def State.ass (x : Var s) (t : Carrier s) (σ : State) : State :=
     | .nat, .nat => if x == x' then t else σ x'
     | _, _ => σ x'
 
-def lfp : ((State → Part State) → (State → Part State)) → State → Part State :=
+noncomputable def lfp (f : (State → Part State) → (State → Part State)) : State → Part State :=
+  open Classical OmegaCompletePartialOrder in
+  if h : Monotone f
+  then ωSup (fixedPoints.iterateChain ⟨f, h⟩ ⊥ bot_le)
+  else ⊥
+
+open OmegaCompletePartialOrder in
+theorem lfp_is_a_fixed_point (h : ωScottContinuous f) : lfp f = f (lfp f) := by
   sorry
 
-def Stmt.eval : Stmt →  State → Part State
+noncomputable def Stmt.eval : Stmt → State → Part State
   | .div, _ => ⊥
   | .skip, σ₁ => σ₁
   | .assign x t, σ₁ => do
