@@ -60,7 +60,8 @@ def State.ass (x : Var s) (t : Carrier s) (σ : State) : State :=
     | .nat, .nat => if x == x' then t else σ x'
     | _, _ => σ x'
 
-def Stmt.eval : Stmt →  State → Option State
+partial def Stmt.eval : Stmt →  State → Option State
+  | .div, _ => none
   | .skip, σ₁ => σ₁
   | .assign x t, σ₁ => do
     let xt ← Term.eval t σ₁
@@ -72,3 +73,6 @@ def Stmt.eval : Stmt →  State → Option State
   | .ifThenElse b s₁ s₂, σ₁ => do
     let x ← Term.eval b σ₁
     if x then Stmt.eval s₁ σ₁ else Stmt.eval s₂ σ₁
+  | .while b s, σ₁ => do
+    let b' ← Term.eval b σ₁
+    if b' then Stmt.eval (Stmt.seq s (.while b s)) σ₁ else return σ₁

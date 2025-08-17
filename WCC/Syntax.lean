@@ -22,8 +22,9 @@ inductive Term : MSort → Type where
 
 
 inductive Stmt where
+  | div : Stmt
   | skip : Stmt
   | assign : Var s → Term s → Stmt
   | seq : Stmt → Stmt → Stmt
   | ifThenElse : Term .bool → Stmt → Stmt → Stmt
-  -- | while : Term → Stmt → Stmt
+  | while : Term .bool → Stmt → Stmt
