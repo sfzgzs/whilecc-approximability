@@ -3,13 +3,23 @@ import WCC.Syntax
 
 abbrev Carrier : MSort → Type
   | .bool => Bool
-  | .nat => Nat
+  | .nat => ℕ
+  | .real => ℝ
 
-instance : BEq (Carrier s) where
+
+noncomputable instance : BEq (Carrier s) where
   beq :=
   match s with
-  | .nat => (· == ·)
-  | .bool => (· == ·)
+  | .nat | .bool | .real => (· == ·)
+
+instance : LT (Carrier s) where
+  lt :=
+  match s with
+  | .nat | .bool | .real => (· < ·)
+
+noncomputable instance {x y : Carrier s} : Decidable (x < y) :=
+  match s with
+  | .nat | .bool | .real => inferInstance
 
 @[simp]
 theorem Carrier.rfl (x : Carrier s) : x == x := by
@@ -17,42 +27,48 @@ theorem Carrier.rfl (x : Carrier s) : x == x := by
 
 abbrev State := ∀ ⦃s: MSort⦄, (Var s → Carrier s)
 
-def Term.eval (t : Term s) (σ : State) : Part (Carrier s) :=
+noncomputable def Term.eval (t : Term s) (σ : State) : Part (Carrier s) :=
   match t with
   | .var x => σ x
-  | .true => Bool.true
-  | .false => Bool.false
-  | .and t₁ t₂ => do
+  | .zero =>
+    match s with
+    | .nat | .bool | .real =>  return 0
+  | .one =>
+    match s with
+    | .nat | .bool | .real =>  return 1
+  | .add t₁ t₂ =>
+    match s with
+    | .nat | .bool | .real => do
+      let x ← eval t₁ σ
+      let y ← eval t₂ σ
+      return x + y
+  | .mul t₁ t₂ =>
+    match s with
+    | .nat | .bool | .real => do
+      let x ← eval t₁ σ
+      let y ← eval t₂ σ
+      return x * y
+  | @Term.eq s' t₁ t₂  => do
     let x ← eval t₁ σ
     let y ← eval t₂ σ
-    return Bool.and x y
-    -- bind (eval t₁ σ) fun (x : Bool) =>
-    -- bind (eval t₂ σ) fun y =>
-    --   Bool.and x y
-  | .or t₁ t₂ => do
+    match s' with
+    | .nat | .bool =>
+      return x == y
+    | .real => do
+      if x == y then ⊥ else return .false
+  | @Term.lt s' t₁ t₂  => do
     let x ← eval t₁ σ
     let y ← eval t₂ σ
-    return Bool.or x y
-  | .zero => some 0
-  | .succ t => do
+    match s' with
+    | .nat | .bool =>
+      return x < y
+    | .real => do
+      if x == y then ⊥ else return x < y
+  | .inv t => do
     let x ← eval t σ
-    return x + 1
-  | .add t₁ t₂ => do
-    let x ← eval t₁ σ
-    let y ← eval t₂ σ
-    return x + y
-  | .mul t₁ t₂ => do
-    let x ← eval t₁ σ
-    let y ← eval t₂ σ
-    return x * y
-  | .eq t₁ t₂  => do
-    let x ← eval t₁ σ
-    let y ← eval t₂ σ
-    return x == y
-  | .lt t₁ t₂  => do
-    let x ← eval t₁ σ
-    let y ← eval t₂ σ
-    return x < y
+    if x == 0 then ⊥ else return 1/x
+  | .neg_one => return (-1 : ℝ)
+
 
 def State.ass (x : Var s) (t : Carrier s) (σ : State) : State :=
   fun s' (x' : Var s') =>
