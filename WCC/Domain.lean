@@ -1,4 +1,7 @@
 import Mathlib
+import Mathlib.Data.Set.Basic
+
+open Set
 
 @[ext]
 structure Domain (X : Type) where
@@ -43,6 +46,32 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
     -- . sorry
     -- subst proof₁
     -- rfl
-  ωSup := sorry
-  le_ωSup := sorry
+  ωSup := by
+    intro h
+    let theSup := (⋃ i, (h i).val) \ { x | x = .none ∧ ∃ i, .none ∉ (h i).val}
+    let simpleProof : ((⋃ i, (h i).val) \ { x | x = .none ∧ ∃ i, .none ∉ (h i).val}) ≠ ∅ := by
+      let supp := {x | x ∈ (⋃ i, (h i).val) ∧ x ∉  { x | x = .none ∧ ∃ i, .none ∉ (h i).val}}
+      by_cases hp : ∃ i, .none ∉ (h i).val
+      · simp [hp]
+        obtain ⟨n, hn⟩ := hp
+        intro hpp
+        rw [Set.diff_eq_empty] at hpp
+        have hpp' := Set.iUnion_subset_iff.mp hpp
+        specialize hpp' n
+        let tmpHn :=  (h n).property
+        rw [←Set.nonempty_iff_ne_empty] at tmpHn
+        rw [Set.Nonempty.subset_singleton_iff tmpHn] at hpp'
+        rw [hpp'] at hn
+        exact hn (Set.mem_singleton none)
+      · simp only [ne_eq]
+        simp [hp]
+        use 0
+        exact (h 0).property
+    exact ⟨theSup, simpleProof⟩
+  le_ωSup := by
+    intro h n
+    apply And.intro
+    · sorry
+    · sorry
+
   ωSup_le := sorry
