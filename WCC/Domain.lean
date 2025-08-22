@@ -73,7 +73,7 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
       true_and, not_exists, Decidable.not_not, and_imp, forall_exists_index]
     intro h n
     apply And.intro
-    · intro nemptyset mem
+    · intro _ _
       by_cases hp : ∃ i, .none ∉ (h i).val
       · simp [hp]
         apply Or.intro_right
