@@ -83,4 +83,28 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
         use n
     · intro i h₁ h₂
       exact h₂ n
-  ωSup_le := sorry
+  ωSup_le := by
+    simp only [diff_singleton_subset_iff, insert_diff_singleton, mem_diff, mem_iUnion, mem_setOf_eq,
+      true_and, not_exists, Decidable.not_not]
+    intro h a h₁
+    by_cases hp : ∃ i, .none ∉ (h i).val
+    · simp [hp]
+      apply And.intro
+      · intro n
+        exact (h₁ n).left
+      · intro h₂
+        apply And.intro
+        · use 0
+          exact (h₁ 0).right h₂
+        · intro m
+          exact (h₁ m).right h₂
+    · simp [hp]
+      apply And.intro
+      · intro n
+        exact (h₁ n).left
+      · intro h₂
+        apply And.intro
+        · use 0
+          exact (h₁ 0).right h₂
+        · intro m
+          exact (h₁ m).right h₂
