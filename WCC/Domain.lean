@@ -49,8 +49,8 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
   ωSup := by
     intro h
     let theSup := (⋃ i, (h i).val) \ { x | x = .none ∧ ∃ i, .none ∉ (h i).val}
-    let simpleProof : ((⋃ i, (h i).val) \ { x | x = .none ∧ ∃ i, .none ∉ (h i).val}) ≠ ∅ := by
-      let supp := {x | x ∈ (⋃ i, (h i).val) ∧ x ∉  { x | x = .none ∧ ∃ i, .none ∉ (h i).val}}
+    have simpleProof : ((⋃ i, (h i).val) \ { x | x = .none ∧ ∃ i, .none ∉ (h i).val}) ≠ ∅ := by
+      have supp := {x | x ∈ (⋃ i, (h i).val) ∧ x ∉  { x | x = .none ∧ ∃ i, .none ∉ (h i).val}}
       by_cases hp : ∃ i, .none ∉ (h i).val
       · simp [hp]
         obtain ⟨n, hn⟩ := hp
@@ -69,9 +69,18 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
         exact (h 0).property
     exact ⟨theSup, simpleProof⟩
   le_ωSup := by
+    simp only [diff_singleton_subset_iff, insert_diff_singleton, mem_diff, mem_iUnion, mem_setOf_eq,
+      true_and, not_exists, Decidable.not_not, and_imp, forall_exists_index]
     intro h n
     apply And.intro
-    · sorry
-    · sorry
-
+    · intro nemptyset mem
+      by_cases hp : ∃ i, .none ∉ (h i).val
+      · simp [hp]
+        apply Or.intro_right
+        use n
+      · simp [hp]
+        apply Or.intro_right
+        use n
+    · intro i h₁ h₂
+      exact h₂ n
   ωSup_le := sorry
