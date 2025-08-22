@@ -108,3 +108,19 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
           exact (h₁ 0).right h₂
         · intro m
           exact (h₁ m).right h₂
+
+@[simp]
+def bottomValue (X : Type) : Domain X :={
+  val := {none},
+  property := by apply Set.singleton_ne_empty
+  }
+
+open Classical in
+instance : OrderBot (Domain X) where
+  bot := bottomValue X
+  bot_le := by
+    intro dom
+    constructor
+    simp [bottomValue, sdiff_self, bot_eq_empty, empty_subset]
+    intro non
+    simp [bottomValue]
