@@ -1,5 +1,6 @@
 import Mathlib
 import WCC.Syntax
+import WCC.Domain
 
 abbrev Carrier : MSort → Type
   | .bool => Bool
@@ -27,9 +28,9 @@ theorem Carrier.rfl (x : Carrier s) : x == x := by
 
 abbrev State := ∀ ⦃s: MSort⦄, (Var s → Carrier s)
 
-noncomputable def Term.eval (t : Term s) (σ : State) : Part (Carrier s) :=
+noncomputable def Term.eval (t : Term s) (σ : State) : Domain (Carrier s) :=
   match t with
-  | .var x => σ x
+  | .var x => return (σ x)
   | .zero =>
     match s with
     | .nat | .bool | .real =>  return 0
@@ -77,7 +78,8 @@ def State.ass (x : Var s) (t : Carrier s) (σ : State) : State :=
     | .nat, .nat => if x == x' then t else σ x'
     | _, _ => σ x'
 
-noncomputable def lfp (f : (State → Part State) → (State → Part State)) : State → Part State :=
+noncomputable def lfp (f : (State → Domain State) → (State → Domain State)) :
+    State → Domain State :=
   open Classical OmegaCompletePartialOrder in
   if h : Monotone f
   then ωSup (fixedPoints.iterateChain ⟨f, h⟩ ⊥ bot_le)
@@ -87,9 +89,9 @@ open OmegaCompletePartialOrder in
 theorem lfp_is_a_fixed_point (h : ωScottContinuous f) : lfp f = f (lfp f) := by
   sorry
 
-noncomputable def Stmt.eval : Stmt → State → Part State
+noncomputable def Stmt.eval : Stmt → State → Domain State
   | .div, _ => ⊥
-  | .skip, σ₁ => σ₁
+  | .skip, σ₁ => return σ₁
   | .assign x t, σ₁ => do
     let xt ← Term.eval t σ₁
     return .ass x xt σ₁
@@ -101,7 +103,7 @@ noncomputable def Stmt.eval : Stmt → State → Part State
     let x ← Term.eval b σ₁
     if x then Stmt.eval s₁ σ₁ else Stmt.eval s₂ σ₁
   | .while b s, σ₁ => lfp (
-    fun (f:State → Part State) (σ : State) => do
+    fun (f:State → Domain State) (σ : State) => do
       let xb ← Term.eval b σ
       if xb then
         let xst ← Stmt.eval s σ
