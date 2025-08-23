@@ -126,3 +126,27 @@ instance : OrderBot (Domain X) where
     · simp only [bottomValue, sdiff_self, bot_eq_empty, empty_subset]
     · intro non
       simp only [bottomValue, mem_singleton_iff]
+
+open Classical in
+instance : Monad Domain where
+  pure := fun x => {
+    val := {some x}
+    property := by simp only [ne_eq, singleton_ne_empty, not_false_eq_true]
+    }
+  bind m f := {
+    val := ⋃ i ∈ m.val,  match i with
+      | some x => (f x).val
+      | none   => {.none}
+    property := by
+      simp only [ne_eq, iUnion_eq_empty, not_forall]
+      have := m.property
+      rw [← Set.nonempty_iff_ne_empty] at this
+      have ⟨w, hw⟩ := this
+      use w
+      use hw
+      cases w with
+      | none => simp only [singleton_ne_empty, not_false_eq_true]
+      | some val =>
+        simp
+        apply (f val).property
+  }
