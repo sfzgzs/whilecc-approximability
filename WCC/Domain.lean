@@ -28,7 +28,7 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
       cases x with
       | none => apply h₂₂ hx
       | some val =>
-        simp at h₁₁
+        simp only [diff_singleton_subset_iff, insert_diff_singleton] at h₁₁
         have := Set.mem_of_subset_of_mem h₁₁ hx
         simp only [Set.mem_insert_iff, reduceCtorEq, false_or] at this
         apply this
@@ -36,7 +36,7 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
       cases x with
       | none => apply h₁₂ hx
       | some val =>
-        simp at h₂₁
+        simp only [diff_singleton_subset_iff, insert_diff_singleton] at h₂₁
         have := Set.mem_of_subset_of_mem h₂₁ hx
         simp only [Set.mem_insert_iff, reduceCtorEq, false_or] at this
         apply this
@@ -52,7 +52,7 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
     have simpleProof : ((⋃ i, (h i).val) \ { x | x = .none ∧ ∃ i, .none ∉ (h i).val}) ≠ ∅ := by
       have supp := {x | x ∈ (⋃ i, (h i).val) ∧ x ∉  { x | x = .none ∧ ∃ i, .none ∉ (h i).val}}
       by_cases hp : ∃ i, .none ∉ (h i).val
-      · simp [hp]
+      · simp only [hp, and_true, setOf_eq_eq_singleton, ne_eq]
         obtain ⟨n, hn⟩ := hp
         intro hpp
         rw [Set.diff_eq_empty] at hpp
@@ -64,7 +64,7 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
         rw [hpp'] at hn
         exact hn (Set.mem_singleton none)
       · simp only [ne_eq]
-        simp [hp]
+        simp only [hp, and_false, setOf_false, diff_empty, iUnion_eq_empty, not_forall]
         use 0
         exact (h 0).property
     exact ⟨theSup, simpleProof⟩
@@ -75,10 +75,11 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
     apply And.intro
     · intro _ _
       by_cases hp : ∃ i, .none ∉ (h i).val
-      · simp [hp]
+      · simp only [hp, and_true, setOf_eq_eq_singleton, insert_diff_singleton, mem_insert_iff,
+        mem_iUnion]
         apply Or.intro_right
         use n
-      · simp [hp]
+      · simp only [hp, and_false, setOf_false, diff_empty, mem_insert_iff, mem_iUnion]
         apply Or.intro_right
         use n
     · intro i h₁ h₂
@@ -88,7 +89,8 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
       true_and, not_exists, Decidable.not_not]
     intro h a h₁
     by_cases hp : ∃ i, .none ∉ (h i).val
-    · simp [hp]
+    · simp only [hp, and_true, setOf_eq_eq_singleton, diff_singleton_subset_iff, mem_insert_iff,
+      true_or, insert_eq_of_mem, iUnion_subset_iff]
       apply And.intro
       · intro n
         exact (h₁ n).left
@@ -98,7 +100,7 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
           exact (h₁ 0).right h₂
         · intro m
           exact (h₁ m).right h₂
-    · simp [hp]
+    · simp only [hp, and_false, setOf_false, diff_empty, iUnion_subset_iff]
       apply And.intro
       · intro n
         exact (h₁ n).left
@@ -121,6 +123,6 @@ instance : OrderBot (Domain X) where
   bot_le := by
     intro dom
     constructor
-    simp [bottomValue, sdiff_self, bot_eq_empty, empty_subset]
-    intro non
-    simp [bottomValue]
+    · simp only [bottomValue, sdiff_self, bot_eq_empty, empty_subset]
+    · intro non
+      simp only [bottomValue, mem_singleton_iff]
