@@ -246,3 +246,11 @@ instance : LawfulMonad Domain := LawfulMonad.mk'
         | none => exact hw₂
         | some shit => exact hw₂
   )
+
+open OmegaCompletePartialOrder in
+lemma ωScottContinuous_bind₁ (f : A → Domain B) : ωScottContinuous (bind · f) := by
+  sorry
+
+open OmegaCompletePartialOrder in
+lemma ωScottContinuous_bind₂ (x : Domain A) : ωScottContinuous (bind x : (A → Domain B) → Domain B) := by
+  sorry
