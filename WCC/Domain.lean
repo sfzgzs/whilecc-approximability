@@ -9,6 +9,7 @@ structure Domain (X : Type) where
   property : val ≠ ∅
 
 open Classical in
+@[simps le ωSup]
 noncomputable instance : OmegaCompletePartialOrder (Domain X) where
   le := fun A B => A.val \ { none } ⊆ B.val \ { none } ∧ (none ∈ B.val → none ∈ A.val)
   le_refl := by simp only [subset_refl, imp_self, and_self, implies_true]
@@ -248,9 +249,37 @@ instance : LawfulMonad Domain := LawfulMonad.mk'
   )
 
 open OmegaCompletePartialOrder in
-lemma ωScottContinuous_bind₁ (f : A → Domain B) : ωScottContinuous (bind · f) := by
-  sorry
-
-open OmegaCompletePartialOrder in
-lemma ωScottContinuous_bind₂ (x : Domain A) : ωScottContinuous (bind x : (A → Domain B) → Domain B) := by
-  sorry
+lemma ωScottContinuous_bind (x : Domain A) : ωScottContinuous (bind x : (A → Domain B) → Domain B) := by
+  rw [OmegaCompletePartialOrder.ωScottContinuous_iff_monotone_map_ωSup]
+  simp only [ωSup_def, Chain.map_coe, OrderHom.coe_mk, Function.comp_apply, bind]
+  use sorry
+  intro c
+  ext b
+  apply Iff.intro
+  · simp only [mem_iUnion, not_exists, mem_diff, mem_setOf_eq, not_and, not_forall, not_not,
+    forall_exists_index]
+    intro a h₁ h₂
+    sorry
+  · simp only [mem_iUnion, not_exists, mem_diff, mem_setOf_eq, not_and, not_forall, not_not,
+    and_imp, forall_exists_index]
+    intro n a h₁ h₂ h₃
+    cases a with
+    | none =>
+      use none
+      use h₁
+    | some v =>
+      simp at h₂
+      cases b with
+      | none =>
+        simp only [forall_const] at h₃
+        sorry
+      | some val =>
+        use some v
+        use h₁
+        simp only
+        simp only [ωSup, Chain.map_coe, Pi.evalOrderHom_coe, Function.comp_apply, Function.eval,
+          mem_diff, mem_iUnion, mem_setOf_eq, not_and, not_exists, not_not]
+        apply And.intro
+        · use n
+        · intro h₄ x'
+          contradiction
