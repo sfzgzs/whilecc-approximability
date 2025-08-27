@@ -69,6 +69,8 @@ noncomputable def Term.eval (t : Term s) (σ : State) : Domain (Carrier s) :=
     let x ← eval t σ
     if x == 0 then ⊥ else return 1/x
   | .neg_one => return (-1 : ℝ)
+  | .choose x t => do
+    sorry
 
 
 def State.ass (x : Var s) (t : Carrier s) (σ : State) : State :=

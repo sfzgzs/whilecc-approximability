@@ -19,6 +19,7 @@ inductive Term : MSort → Type where
   | one : Term s
   | neg_one : Term .real
   | inv : Term .real → Term .real
+  | choose : Var .nat → Term .bool → Term .nat
 
 @[match_pattern]
 def Term.true : Term .bool := Term.one
