@@ -6,7 +6,7 @@ In order to represent the denotational semantics, we need to
     + Monotonicity
     + Scott-continuity
 Then knowing that F is Scott-continuous on a $\omega$-complete partial order with $\bot$, then:  
-  $lfp(F) = \Cup \{F^n(\bot ) | n \in \mathbb{N}\}$  
+  lfp(F) = ⊔ {Fⁿ($\bot$) | n $\in$ ℕ}  
 exists, and is the least fixed point of F.
 This gives us the denotation of our recursive function.  
 
