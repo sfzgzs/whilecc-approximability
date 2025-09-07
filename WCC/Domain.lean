@@ -42,9 +42,10 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
     apply And.intro
     · intro x h₁
       use x
-      simp only [or_true, and_true]
-      exact h₁
-    · sorry
+      simp only [or_true, and_true, h₁]
+    · intro x₂ h₂
+      use x₂
+      simp only [or_true, and_true, h₂]
   le_trans := sorry
   le_antisymm := sorry
   ωSup := sorry
