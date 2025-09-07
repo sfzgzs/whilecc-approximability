@@ -31,6 +31,27 @@ example :
     zero_ne_one, or_false, imp_self, and_self, Domain.newOrder, Option.newOrder, exists_eq_or_imp,
     exists_eq_left, forall_eq, or_true, false_or, forall_eq_or_imp, and_false]
 
+
+open Classical in
+-- @[simps le ωSup]
+noncomputable instance : OmegaCompletePartialOrder (Domain X) where
+  le := fun A B => Domain.newOrder A B
+  le_refl := by
+    simp only [Domain.newOrder, Option.newOrder]
+    intro d
+    apply And.intro
+    · intro x h₁
+      use x
+      simp only [or_true, and_true]
+      exact h₁
+    · sorry
+  le_trans := sorry
+  le_antisymm := sorry
+  ωSup := sorry
+  le_ωSup := sorry
+  ωSup_le :=sorry
+
+
 open Classical in
 @[simps le ωSup]
 noncomputable instance : OmegaCompletePartialOrder (Domain X) where
