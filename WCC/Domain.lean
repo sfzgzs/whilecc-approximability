@@ -71,8 +71,38 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
         rw [← hw₁₂] at hy
         simp only [reduceCtorEq, false_or] at hy
         exact ⟨y, hyZ, hy⟩
-    · sorry
-
+    · intro z hz
+      cases z with
+      | none =>
+        let ⟨w₂, hw₂⟩ := hzy₁ none hz
+        let ⟨w₁, hw₁₁, hw₁₂⟩  := hzy₁ none hz
+        let ⟨wh, ⟨hwh, hw⟩⟩  := hyx₁ w₁ hw₁₁
+        simp only [or_self]
+        use wh
+        cases hw with
+        | inl hL =>
+          rw [← hL]
+          simp only [and_true]
+          exact hwh
+        | inr hR =>
+          rw [hR]
+          simp [hR] at hwh
+          simp only [or_self] at hw₁₂
+          exact ⟨hwh, hw₁₂⟩
+      | some val =>
+        let ⟨w₂, hw₂⟩ := hzy₁ (some val) hz
+        let ⟨w₁, hw₁₁, hw₁₂⟩  := hzy₁ (some val) hz
+        let ⟨wh, ⟨hwh, hw⟩⟩  := hyx₁ w₁ hw₁₁
+        use wh
+        cases hw with
+        | inl hL =>
+          rw [← hL]
+          simp only [true_or, and_true]
+          exact hwh
+        | inr hR =>
+          rw [hR]
+          simp [hR] at hwh
+          exact ⟨hwh, hw₁₂⟩
   le_antisymm := sorry
   ωSup := sorry
   le_ωSup := sorry
