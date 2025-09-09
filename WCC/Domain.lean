@@ -129,14 +129,8 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
         let ⟨wn, hn₁, hn₂⟩  := hxy₁ (some val) hx₁
         simp only [reduceCtorEq, false_or] at hn₂
         let ⟨wwn, hwn₁, hwn₂⟩  := hyx₁ wn hn₁
-        cases hwn₂ with
-        | inl h =>
-          rw [h] at hn₂
-          contradiction
-        | inr h =>
-          rw [← h] at hwn₁
-          rw [hn₂]
-          exact hn₁
+        rw [← hn₂] at hn₁
+        exact hn₁
     · intro hy₁
       cases x₁ with
       | none =>
