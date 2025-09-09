@@ -42,11 +42,37 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
     apply And.intro
     · intro x h₁
       use x
-      simp only [or_true, and_true, h₁]
+      simp only [or_true, and_true]
+      exact  h₁
     · intro x₂ h₂
       use x₂
-      simp only [or_true, and_true, h₂]
-  le_trans := sorry
+      simp only [or_true, and_true]
+      exact h₂
+  le_trans := by
+    simp only [Domain.newOrder, Option.newOrder, and_imp]
+    intro X Y Z hxy₁ hyx₁ hyz₁ hzy₁
+    apply And.intro
+    · intro x hx
+      cases x with
+      | none =>
+        let ⟨w₂, hw₂⟩ := hxy₁ none hx
+        let ⟨w₁, hw₁₁, hw₁₂⟩  := hxy₁ none hx
+        let ⟨wh, ⟨hwh, hw⟩⟩  := hyz₁ w₁ hw₁₁
+        use wh
+        simp only [true_or, and_true]
+        exact hwh
+      | some val =>
+        let ⟨w₂, hw₂⟩ := hxy₁ (some val) hx
+        let ⟨w₁, hw₁₁, hw₁₂⟩  := hxy₁ (some val) hx
+        let ⟨wh, ⟨hwh, hw⟩⟩  := hyz₁ w₁ hw₁₁
+        simp only [reduceCtorEq, false_or] at hw₁₂
+        simp only [reduceCtorEq, false_or]
+        let ⟨y, hyZ, hy⟩ := hyz₁ w₁ hw₁₁
+        rw [← hw₁₂] at hy
+        simp only [reduceCtorEq, false_or] at hy
+        exact ⟨y, hyZ, hy⟩
+    · sorry
+
   le_antisymm := sorry
   ωSup := sorry
   le_ωSup := sorry
