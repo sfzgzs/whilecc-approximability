@@ -103,7 +103,41 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
           rw [hR]
           simp [hR] at hwh
           exact ⟨hwh, hw₁₂⟩
-  le_antisymm := sorry
+  le_antisymm := by
+    intro X Y hxy hyx
+    simp only [Domain.newOrder, Option.newOrder] at hxy hyx
+    rcases hxy with ⟨hxy₁, hxy₂⟩
+    rcases hyx with ⟨hyx₁, hyx₂⟩
+    ext x₁
+    apply Iff.intro
+    · intro hx₁
+      cases x₁ with
+      | none =>
+        let ⟨wn, hn⟩  := hxy₁ none hx₁
+        simp only [true_or, and_true] at hn
+        let ⟨wwn, hwn₁, hwn₂⟩  := hyx₁ wn hn
+        cases hwn₂ with
+        | inl h =>
+          rw [← h]
+          exact hn
+        | inr h =>
+          let ⟨y, hyY, hr⟩ := hyx₂ none hx₁
+          simp only [or_self] at hr
+          rw [← hr]
+          exact hyY
+      | some val =>
+        let ⟨wn, hn₁, hn₂⟩  := hxy₁ (some val) hx₁
+        simp only [reduceCtorEq, false_or] at hn₂
+        let ⟨wwn, hwn₁, hwn₂⟩  := hyx₁ wn hn₁
+        cases hwn₂ with
+        | inl h =>
+          rw [h] at hn₂
+          contradiction
+        | inr h =>
+          rw [← h] at hwn₁
+          rw [hn₂]
+          exact hn₁
+    · sorry
   ωSup := sorry
   le_ωSup := sorry
   ωSup_le :=sorry
