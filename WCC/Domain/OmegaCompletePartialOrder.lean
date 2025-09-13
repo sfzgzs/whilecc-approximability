@@ -49,34 +49,91 @@ theorem chain_mon
   : h₀ n₁ ≤ h₀ n₂ := by
   exact h₀.monotone h₁
 
+
+theorem Domain.some_exists {X : Type} (x : Domain X) :
+    none ∉ x.val → ∃ v : X, some v ∈ x.val := by
+  intro hnone
+  let ex := x.property
+  rw [← Set.nonempty_iff_ne_empty] at ex
+  rcases ex with ⟨y, hy⟩
+
+  cases y with
+  | none =>
+    contradiction
+  | some v =>
+    exact ⟨v, hy⟩
+
+open Classical in
 noncomputable instance : OmegaCompletePartialOrder (Domain X) where
   ωSup := thesup X
   le_ωSup := by
     intro h n
     let theSup := thesup X h
     change h n ≤ thesup X h
-    by_cases hp : ∃ i, .none ∉ (h i).val
-    · rcases hp with ⟨w, hw⟩
-      simp only [LE.le, Domain.newOrder, thesup, mem_diff, mem_iUnion, mem_setOf_eq, not_and,
-        not_exists, Option.newOrder, and_imp, forall_exists_index]
-      apply And.intro
-      · intro x h₁
-        cases x with
-        | none =>
-          use none
+    let nempty := (h n).property
+    rw [←Set.nonempty_iff_ne_empty] at nempty
+    rcases nempty with ⟨w, hw⟩
+    simp only [LE.le, Domain.newOrder]
+    apply And.intro
+    · intro x h₁
+      by_cases hp : ∃ i, .none ∉ (h i).val
+      · rcases hp with ⟨w₁, hw₁⟩
+        let nnone := (h w₁).property
+        rw [←Set.nonempty_iff_ne_empty] at nnone
+        rcases nnone with ⟨wnone, hwnone⟩
+        let wnoneval := Domain.some_exists (h w₁) hw₁
+        rcases wnoneval with ⟨sv, hsv⟩
+        use some sv
+        apply And.intro
+        · simp only [thesup, mem_diff, mem_iUnion, mem_setOf_eq, reduceCtorEq, false_and,
+          not_false_eq_true, and_true]
+          use w₁
+        · simp only [Option.newOrder]
+
+
+      · simp only [not_exists, not_not] at hp
+        use x
+        apply And.intro
+        · simp only [thesup]
           apply And.intro
-          · simp only [forall_const]
-            apply And.intro
-            · use n
-            · intro m₂
-              by_cases h₂: m₂ ≤ n
-              · simp only [not_not]
-                let ord : h m₂ ≤ h n := by
-                  apply chain_mon h m₂ n h₂
-                apply none_is_carried_down ord h₁
-              · sorry
-          · sorry
-        | some val => sorry
-      · sorry
+          · simp only [mem_iUnion]
+            use n
+          · simp only [mem_setOf_eq, not_and, not_exists, not_not]
+            intro h₂
+            exact hp
+        · simp only [Option.newOrder, or_true]
     · sorry
+    -- · intro x h₁
+    --   use x
+    --   simp only [or_true, and_true]
+    --   apply And.intro
+    --   · use n
+    --   · intro h₂ i
+
+    · sorry
+    -- by_cases hp : ∃ i, .none ∉ (h i).val
+    -- · rcases hp with ⟨w, hw⟩
+    --   simp only [LE.le, Domain.newOrder, thesup, mem_diff, mem_iUnion, mem_setOf_eq, not_and,
+    --     not_exists, Option.newOrder, and_imp, forall_exists_index]
+    --   apply And.intro
+    --   · intro x h₁
+    --     cases x with
+    --     | none =>
+    --       use none
+    --       apply And.intro
+    --       · simp only [forall_const]
+    --         apply And.intro
+    --         · use n
+    --         · intro m
+    --           simp only [not_not]
+    --           by_cases h₂: m ≤ n
+    --           · let ord : h m ≤ h n := by
+    --               apply chain_mon h m n h₂
+    --             apply none_is_carried_down ord h₁
+    --           · simp only [not_le] at h₂
+    --             sorry
+    --       · sorry
+    --     | some val => sorry
+    --   · sorry
+    -- · sorry
   ωSup_le := sorry
