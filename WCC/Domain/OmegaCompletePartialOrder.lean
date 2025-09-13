@@ -88,7 +88,11 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
         · simp only [thesup, mem_diff, mem_iUnion, mem_setOf_eq, reduceCtorEq, false_and,
           not_false_eq_true, and_true]
           use w₁
+<<<<<<< HEAD
         · simp only [Option.newOrder]
+=======
+        · sorry
+>>>>>>> 17cb589 (Take2 le_ωSup)
 
 
       · simp only [not_exists, not_not] at hp
@@ -109,8 +113,11 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
     --   apply And.intro
     --   · use n
     --   · intro h₂ i
+<<<<<<< HEAD
 
     · sorry
+=======
+>>>>>>> 17cb589 (Take2 le_ωSup)
     -- by_cases hp : ∃ i, .none ∉ (h i).val
     -- · rcases hp with ⟨w, hw⟩
     --   simp only [LE.le, Domain.newOrder, thesup, mem_diff, mem_iUnion, mem_setOf_eq, not_and,
