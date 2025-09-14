@@ -10,9 +10,29 @@ structure Domain (X : Type) where
 def Domain.oldOrder (d₁ d₂ : Domain X) : Prop :=
 d₁.val \ { none } ⊆ d₂.val \ { none } ∧ (none ∈ d₂.val → none ∈ d₁.val)
 
-@[simp]
 def Option.newOrder (o₁ o₂ : Option X) : Prop :=
   o₁ = .none ∨ o₁ = o₂
+
+@[simp]
+lemma Option.newOrder_none_left (o : Option X) : Option.newOrder none o := by
+  simp only [newOrder, true_or]
+
+@[simp]
+lemma Option.newOrder_none_right (o : Option X) : Option.newOrder o none ↔ o = none  := by
+  simp only [newOrder, _root_.or_self]
+
+@[simp]
+lemma Option.newOrder_some (x : X) (o : Option X) : Option.newOrder (some x) o ↔ o = some x  := by
+  simp only [newOrder, reduceCtorEq, false_or]
+  grind
+
+@[simp]
+lemma Option.newOrder_refl (x : Option X) : Option.newOrder x x  := by
+  cases x with
+  | none => simp only [newOrder_none_right]
+  | some val =>
+    simp only [newOrder_some]
+
 
 @[simp]
 def Domain.newOrder (d₁ d₂ : Domain X) : Prop :=
