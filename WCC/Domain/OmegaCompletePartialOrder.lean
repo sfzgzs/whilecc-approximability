@@ -50,18 +50,14 @@ theorem chain_mon
   exact h₀.monotone h₁
 
 
-theorem Domain.some_exists {X : Type} (x : Domain X) :
-    none ∉ x.val → ∃ v : X, some v ∈ x.val := by
-  intro hnone
-  let ex := x.property
-  rw [← Set.nonempty_iff_ne_empty] at ex
-  rcases ex with ⟨y, hy⟩
-
+theorem Domain.some_exists {X : Type} (x : Domain X) (y : Option X)
+  (hn : none ∉ x.val) (he : y ∈ x.val)
+  : ∃ v : X, y = some v := by
   cases y with
   | none =>
     contradiction
   | some v =>
-    exact ⟨v, hy⟩
+    simp only [Option.some.injEq, exists_eq']
 
 open Classical in
 noncomputable instance : OmegaCompletePartialOrder (Domain X) where
@@ -75,63 +71,23 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
     rcases nempty with ⟨w, hw⟩
     simp only [LE.le, Domain.newOrder]
     apply And.intro
-    · intro x h₁
-      by_cases hp : ∃ i, .none ∉ (h i).val
-      · rcases hp with ⟨w₁, hw₁⟩
-        let nnone := (h w₁).property
-        rw [←Set.nonempty_iff_ne_empty] at nnone
-        rcases nnone with ⟨wnone, hwnone⟩
-        let wnoneval := Domain.some_exists (h w₁) hw₁
-        rcases wnoneval with ⟨sv, hsv⟩
-        use some sv
+    · intro we h₁
+      cases we with
+      | none =>
+        let supthing := theSup.property
+        rw [←Set.nonempty_iff_ne_empty] at supthing
+        rcases supthing with ⟨supelem, hsupelem⟩
+        use supelem
+        apply And.intro
+        · exact hsupelem
+        · simp only [Option.newOrder, true_or]
+
+      | some val =>
+        use some val
         apply And.intro
         · simp only [thesup, mem_diff, mem_iUnion, mem_setOf_eq, reduceCtorEq, false_and,
           not_false_eq_true, and_true]
-          use w₁
-        · sorry
-
-
-      · simp only [not_exists, not_not] at hp
-        use x
-        apply And.intro
-        · simp only [thesup]
-          apply And.intro
-          · simp only [mem_iUnion]
-            use n
-          · simp only [mem_setOf_eq, not_and, not_exists, not_not]
-            intro h₂
-            exact hp
-        · simp only [Option.newOrder, or_true]
+          use n
+        · simp only [Option.newOrder, reduceCtorEq, or_true]
     · sorry
-    -- · intro x h₁
-    --   use x
-    --   simp only [or_true, and_true]
-    --   apply And.intro
-    --   · use n
-    --   · intro h₂ i
-    -- by_cases hp : ∃ i, .none ∉ (h i).val
-    -- · rcases hp with ⟨w, hw⟩
-    --   simp only [LE.le, Domain.newOrder, thesup, mem_diff, mem_iUnion, mem_setOf_eq, not_and,
-    --     not_exists, Option.newOrder, and_imp, forall_exists_index]
-    --   apply And.intro
-    --   · intro x h₁
-    --     cases x with
-    --     | none =>
-    --       use none
-    --       apply And.intro
-    --       · simp only [forall_const]
-    --         apply And.intro
-    --         · use n
-    --         · intro m
-    --           simp only [not_not]
-    --           by_cases h₂: m ≤ n
-    --           · let ord : h m ≤ h n := by
-    --               apply chain_mon h m n h₂
-    --             apply none_is_carried_down ord h₁
-    --           · simp only [not_le] at h₂
-    --             sorry
-    --       · sorry
-    --     | some val => sorry
-    --   · sorry
-    -- · sorry
   ωSup_le := sorry
