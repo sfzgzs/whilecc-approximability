@@ -42,8 +42,6 @@ lemma some_mem_sup {X : Type} (v : X) (h : OmegaCompletePartialOrder.Chain (Doma
   simp only [thesup, mem_diff, mem_iUnion, mem_setOf_eq, reduceCtorEq, false_and, not_false_eq_true,
     and_true]
 
-
--- @[simp]
 theorem none_is_carried_down
     {x y : Domain X}
     (h₁ : x ≤ y)
@@ -57,6 +55,36 @@ theorem none_is_carried_down
   subst h₇
   exact h₆
 
+lemma some_in_chain {X : Type} (v : X) (h₁ : OmegaCompletePartialOrder.Chain (Domain X))
+  (h₂ : ∃ i, some v ∈ (h₁ i).val)
+  :  ∃ i, some v ∈ (h₁ i).val ∧ ∀ j, j < i → none ∈ (h₁ j).val := by
+  rcases h₂ with ⟨i, hi⟩
+  induction i with
+  | zero =>
+    use 0
+    simp only [not_lt_zero', IsEmpty.forall_iff, implies_true, and_true]
+    exact hi
+  | succ n ih =>
+    by_cases h : some v ∈ (h₁ n).val
+    · exact ih h
+    · have : n ≤ n + 1 := by simp only [le_add_iff_nonneg_right, zero_le]
+      have := h₁.monotone this
+      simp only [LE.le, Domain.newOrder] at this
+      rcases this with ⟨h₂, h₃⟩
+      specialize h₃ (some v) hi
+      rcases h₃ with ⟨x, hx⟩
+      cases x with
+      | none =>
+        use n + 1, hi
+        intro j hj
+        apply none_is_carried_down ?_ hx.1
+        apply h₁.monotone
+        grind
+      | some x =>
+        simp only [Option.newOrder_some, Option.some.injEq] at hx
+        grind
+
+-- @[simp]
 theorem chain_mon
   (h₀ : OmegaCompletePartialOrder.Chain (Domain X))
   (n₁ n₂ : ℕ)
