@@ -15,7 +15,7 @@ def thesup (X : Type) (h : OmegaCompletePartialOrder.Chain (Domain X)) : Domain 
         rw [Set.diff_eq_empty] at hpp
         have hpp' := Set.iUnion_subset_iff.mp hpp
         specialize hpp' n
-        let tmpHn :=  (h n).property
+        have tmpHn :=  (h n).property
         rw [←Set.nonempty_iff_ne_empty] at tmpHn
         rw [Set.Nonempty.subset_singleton_iff tmpHn] at hpp'
         rw [hpp'] at hn
@@ -49,7 +49,7 @@ theorem none_is_carried_down
   : .none ∈ x.val := by
   simp only [LE.le, Domain.newOrder] at h₁
   rcases h₁ with ⟨h₃, h₄⟩
-  let tmp := h₄ none h₂
+  have tmp := h₄ none h₂
   rcases tmp with ⟨h₅, h₆, h₇⟩
   simp only [Option.newOrder_none_right] at h₇
   subst h₇
@@ -155,4 +155,38 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
           simp only [Option.newOrder_none_left, and_true]
           use hi₂
 
-  ωSup_le := sorry
+  ωSup_le := by
+    intro h d h₁
+    simp only [LE.le, Domain.newOrder]
+    apply And.intro
+    · intro x h₂
+      cases x with
+      | none =>
+        simp only [Option.newOrder_none_left, and_true]
+        have nempty := d.property
+        rw [← nonempty_iff_ne_empty] at nempty
+        exact nempty
+      | some val =>
+        simp only [Option.newOrder_some, exists_eq_right]
+        simp only [some_mem_sup] at h₂
+        rcases h₂ with ⟨w₂, hw₂⟩
+        exact Domain.newOrder.some_le val (h₁ w₂) hw₂
+    · intro x h₂
+      cases x with
+      | none =>
+        simp only [Option.newOrder_none_right, exists_eq_right, none_mem_sup]
+        intro i
+        exact Domain.newOrder.le_none (h₁ i) h₂
+      | some val =>
+        by_cases hp : none ∈ (thesup X h).val
+        · simp only [none_mem_sup] at hp
+          use none
+          simp only [none_mem_sup, Option.newOrder_none_left, and_true]
+          exact hp
+        · simp only [none_mem_sup, not_forall] at hp
+          rcases hp with ⟨w, wh⟩
+          have tmp := Domain.newOrder.none_not_mem (h₁ w) wh
+          have tmp₂ := Domain.newOrder.none_not_mem_le_some (h₁ w) h₂ wh
+          use some val
+          simp only [some_mem_sup, Option.newOrder_refl, and_true]
+          use w
