@@ -131,5 +131,28 @@ noncomputable instance : OmegaCompletePartialOrder (Domain X) where
         · simp only [some_mem_sup]
           use n
         · simp only [Option.newOrder_refl]
-    · sorry
+    · intro y h₁
+      cases y with
+      | none =>
+        simp only [Option.newOrder_none_right, exists_eq_right]
+        simp only [none_mem_sup] at h₁
+        exact h₁ n
+      | some val =>
+        simp only [some_mem_sup] at h₁
+        obtain ⟨i, hi₁, hi₂⟩ := some_in_chain val _ h₁
+        by_cases hn : i ≤ n
+        · use some val
+          simp only [Option.newOrder_refl, and_true]
+          have := h.monotone hn
+          simp only [LE.le, Domain.newOrder] at this
+          rcases this with ⟨h₁, h₂⟩
+          specialize h₁ _ hi₁
+          simp only [Option.newOrder_some, exists_eq_right] at h₁
+          exact h₁
+        · simp only [not_le] at hn
+          specialize hi₂ _ hn
+          use none
+          simp only [Option.newOrder_none_left, and_true]
+          use hi₂
+
   ωSup_le := sorry
