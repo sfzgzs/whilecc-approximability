@@ -13,7 +13,7 @@ exists, and is the least fixed point of F.
 This gives us the denotation of our recursive function.
 
 
-ALTHOUGH, the omega complete partial order defined here is NOT $\omega$ScottContinuous. In fact, Plotkin and Apt [show](https://homepages.inf.ed.ac.uk/gdp/publications/Countable_nondeterminism_random_assignment.pdf) that such denotational semantics cannot exist.
+HOWEVER, the intuitive omega complete partial order relation defined here is NOT $\omega$ScottContinuous. In fact, Plotkin and Apt [show](https://homepages.inf.ed.ac.uk/gdp/publications/Countable_nondeterminism_random_assignment.pdf) that such denotational semantics cannot exist.
 
 
 # References
